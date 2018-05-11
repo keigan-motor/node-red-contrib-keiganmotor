@@ -1,0 +1,103 @@
+<script type="text/javascript">
+    RED.nodes.registerType('km-motor',{
+        category: 'Keigan Motor',
+        color: '#ffc6ee',
+        defaults: {
+            name : { value: "" },
+            allowConnectMotor: { value: "" }
+        },
+        inputs:1,
+        outputs:4,
+        inputLabels: "Motor command input",
+        outputLabels: ["Status output","Motor measurement output","Imu measurement output","Motor setting output"],
+        icon: "kmmt.png",
+        label: function() {
+            return (this.name||"Keigan Motor")+" /"+(this.allowConnectMotor||"*");
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="km-motor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+     <div class="form-row">
+      <label for="node-input-allowConnectMotor"><i class="icon-tag"></i>Allow Connect Motor</label>
+      <input type="text" id="node-input-allowConnectMotor" size="12" placeholder="KM-1 xxxx">
+    </div>
+    <div class="form-tips"><b>Allow Connect Motor:</b>
+    <p>ここに記述のあるモーター名のモーターのみ接続を許可します。<br/>
+    スキャナーの出力に複数のモータノードを接続した場合に、スキャナーで検出した複数のモーターを任意のモーターノードに割り当てる場合に使用します。<br/>
+    接続を制限しない場合はヌル""を指定します。</p>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="km-motor">
+<p>Keigan Motorを操作する為の仮想モーターノード</p>
+<h3>入力</h3>
+    <p>モーターに接続・操作する為のコマンド・引数</p>
+    <dl class="message-properties">
+    <dt>topic<span class="property-type">string</span></dt>
+    <dd>モーターコマンド名 ex) cmdLed</dd>
+    <dt>payload<span class="property-type">number or array[number,,]</span></dt>
+    <dd>モーターコマンドの引数　引数が複数の場合はカンマ区切りの文字列として指定も出来ます<br/>ex) "10,20,30" </dd>
+    </dl>
+     <p>コマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</p>
+<h3>出力1</h3>
+    <p>モーターの各種ステータス</p>
+    <dl class="message-properties">
+    <dt>topic:"status"<span class="property-type">string</span></dt>
+    <dd>このデータの種類 "status"</dd>
+    <dt>payload<span class="property-type">string</span></dt>
+    <dd>状態メッセージ 接続 "connect" 切断された "disconnect" 接続に失敗 "connectFailure"</dd>
+    </dl>
+<h3>出力2</h3>
+    <p>モーターの回転情報</p>
+    <dl class="message-properties">
+    <dt>topic:"motorMeasurement"<span class="property-type">string</span></dt>
+    <dd>このデータの種類 "motorMeasurement"</dd>
+    <dt>name<span class="property-type">string</span></dt>
+    <dd>モーター名 ex) KM-1 XXXX</dd>
+    <dt>payload<span class="property-type">object</span></dt>
+    <dd><a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMRotState.html" target="_blank">モーターの回転情報</a></dd>
+    </dl>
+<h3>出力3</h3>
+    <p>モータージャイロ情報<br/>コマンドにてジャイロ有効化 "cmdEnableIMU()" 時のみ出力されます。</p>
+    <dl class="message-properties">
+    <dt>topic:"imuMeasurement"<span class="property-type">string</span></dt>
+    <dd>このデータの種類 "imuMeasurement"</dd>
+    <dt>name<span class="property-type">string</span></dt>
+    <dd>モーター名 ex) KM-1 XXXX</dd>
+    <dt>payload<span class="property-type">object</span></dt>
+    <dd><a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMImuState.html" target="_blank">モーターのジャイロ情報</a></dd>
+    </dl>
+<h3>出力4</h3>
+ <p>モーター設定値情報<br/>"cmdReadRegister"や"cmdReadAllRegister"で取得した値が出力されます。</p>
+ <dl class="message-properties">
+    <dt>topic:"setting"<span class="property-type">string</span></dt>
+    <dd>このデータの種類 "setting"</dd>
+    <dt>name<span class="property-type">string</span></dt>
+    <dd>モーター名 ex) KM-1 XXXX</dd>
+    <dt>payload<span class="property-type">object</span></dt>
+    <dd><a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorCommandKMOne.html#.cmdReadRegister_COMMAND__anchor" target="_blank">取得した設定</a></dd>
+    </dl>
+<h3>詳細</h3>
+<h4>主なモーターコマンド</h4>
+<p><b>全てのコマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</b></p>
+<ul>
+<li><code>connect:"モーター名"</code> - 指定したモーターに接続する。</li>
+<li><code>disConnect:""</code> - モーターを切断する。<br/>注:同じモーターに接続しているモーターノードが複数ある場合は、全て切断されます。</li>
+<li><code>cmdReadAllRegister:""</code> - モーターの設定情報を取得する</li>
+<li><code>cmdEnable:""</code> - モーター動作を許可する。<br/>モーター起動時は disable 状態のため、本コマンドで動作を許可する必要があります。</li>
+<li><code>cmdDisable:""</code> - モーター動作を停止する。</li>
+
+<li><code>cmdSpeed_rpm:速度number</code> - 速度の大きさをセットする。（単位：RPM）</li>
+
+<li><code>cmdRunForward:""</code> - 正回転する（反時計回り）</li>
+<li><code>cmdRunReverse:""</code> - 逆回転する（時計回り）</li>
+<li><code>cmdFree:""</code> - モーターの励磁を停止する（感触は残ります）<br/>
+完全な空転状態を再現する場合は、<code>cmdFree:""</code><code>cmdDisable:""</code>と実行して下さい。</li>
+<li><code>cmdStop:""</code> - モーターを速度ゼロまで減速し停止する。<br/>rpm = 0 となる。</li>
+</ul>
+</script>

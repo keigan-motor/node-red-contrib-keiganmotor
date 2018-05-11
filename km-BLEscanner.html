@@ -1,0 +1,67 @@
+<script type="text/javascript">
+    RED.nodes.registerType('km-BLEscan',{
+        category: 'Keigan Motor',
+        color: '#ffc6ee',
+        defaults: {
+            name: {value:""},
+        },
+        inputs:1,
+        outputs:2,
+        inputLabels: "Scan command input",
+        outputLabels: ["Discovered motor information output","Scan timeout output"],
+        icon: "bridge.png",
+        label: function() {
+            return this.name||"Keigan BLE scanner";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="km-BLEscan">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="km-BLEscan">
+    <p>KeiganMotorを検出するBLEscannerです。このスキャナーで検出されたモーター名をKeiganMotorノードに渡します。</p>
+    <h3>入力</h3>
+    <dl class="message-properties">
+    <dt>payload<span class="property-type">number</span></dt>
+    <dd>スキャンする時間(ms)</dd>
+    </dl>
+    <h3>出力1</h3>
+    <p>スキャン中に発見したモーター名を随時出力</p>
+    <dl class="message-properties">
+    <dt>topic:"discoverMotor"<span class="property-type">string</span></dt>
+    <dd>このデータの種類 "discoverMotor"</dd>
+    <dt>payload<span class="property-type">string</span></dt>
+    <dd>発見したモーター名</dd>
+    <dt>motorFullname<span class="property-type">string</span></dt>
+    <dd>発見したモーター名(LEDコード含む)</dd>
+    <dt>motorLedColor<span class="property-type">string</span></dt>
+    <dd>発見したモーターのLEDカラー値(RGB 各16段階)</dd>
+    <dt>isConnect<span class="property-type">boolean</span></dt>
+    <dd>モーターの接続状態</dd>
+    </dl>
+
+     <h3>出力2</h3>
+    <p>スキャン終了時にスキャン中に発見したモーター名を一括出力</p>
+    <dl class="message-properties">
+    <dt>topic:"scanTimeout"<span class="property-type">string</span></dt>
+    <dd>このデータの種類 "scanTimeout"</dd>
+
+    <dt>payload<span class="property-type">array[string,,]</span></dt>
+    <dd>発見したモーター名の配列</dd>
+
+    <dt>deviceInfos<span class="property-type">object</span></dt>
+    <dd>発見したモーターの詳細情報</dd>
+    </dl>
+    <h3>詳細</h3>
+    <ul>
+        <li>スキャナーで検出されていないモーターは接続できません。</li>
+        <li>スキャナーが複数ある場合や別のフローに設置したスキャナーでモーターを検出している場合、検出したモーターは全てのスキャナーで共有されます。</li>
+    </ul>
+    <h4>BLEデバイス固有の問題</h4>
+    <p>RaspberryPi3等の一部のBLEデバイスではスキャン中に接続(出力1をkm motorの入力に繋ぐ)を行うと、後続のスキャン動作が停止したり正常に接続出来ない場合があります。<br/>その場合は、スキャナーがタイムアウトした段階でモーターに接続(出力2をkm motorの入力に繋ぐ)するようにして下さい。</p>
+</script>
