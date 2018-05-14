@@ -1,6 +1,6 @@
 let KMConnector=require('kmconnector');
 
-///////
+////////
 module.exports = function(RED) {
     //スキャンの開始
     function startScan(time){
