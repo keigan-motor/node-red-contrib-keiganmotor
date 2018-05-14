@@ -18,35 +18,35 @@ module.exports = function(RED) {
         node._connectLis=function(kMDeviceInfo){
             console.log("_connectLis:"+kMDeviceInfo.name);
             if(kMDeviceInfo.isConnect){
-                node.send({"topic":"status","payload":"connect",name:kMDeviceInfo.name});
+                node.send({"type":"status","payload":"connect",name:kMDeviceInfo.name});
                 node.status({fill:"green",shape:"dot",text:"connect:"+kMDeviceInfo.name});
             }
         };
         //出力1 応答が無くなった・切断された
         node._disconnectLis=function(kMDeviceInfo){
             console.log("_disconnectLis:"+kMDeviceInfo.name);
-            node.send({"topic":"status","payload":"disconnect",name:kMDeviceInfo.name});
+            node.send({"type":"status","payload":"disconnect",name:kMDeviceInfo.name});
             node.status({fill:"gray",shape:"ring",text:"disconnect:"+kMDeviceInfo.name});
         };
         //出力1 接続に失敗
         node._connectFailureLis=function(kMDeviceInfo,err){
-            node.send({"topic":"status","payload":"connectFailure",name:kMDeviceInfo.name,err:err});
+            node.send({"type":"status","payload":"connectFailure",name:kMDeviceInfo.name,err:err});
             node.status({fill:"red",shape:"ring",text:"connectFailure:"+kMDeviceInfo.name});
         };
         //出力1 初期化完了して利用できるようになった
         node._initLis=function(kMDeviceInfo){
-           // node.send({"topic":"status","payload":"init",name:kMDeviceInfo.name});//物理デバイス毎でのイベント。使用しない
+           // node.send({"type":"status","payload":"init",name:kMDeviceInfo.name});//物理デバイス毎でのイベント。使用しない
             node.status({fill:"blue",shape:"ring",text:"init:"+kMDeviceInfo.name});
         };
 
         //出力2 モーターの回転情報
         node._motorMeasurementLis=function(kMRotState){
-            node.send([null,{"topic":"motorMeasurement","name":this.deviceInfo.name,"payload":kMRotState.GetValObj()}]);
+            node.send([null,{"type":"motorMeasurement","name":this.deviceInfo.name,"payload":kMRotState.GetValObj()}]);
         };
         //出力3 モーターIMU情報受信
         node._imuMeasurementLis=function(kMImuState){
             //info::ジャイロ有効化（kMMotorOneBLE.cmdEnableIMU()）時のみ出力される
-            node.send([null,null,{"topic":"imuMeasurement","name":this.deviceInfo.name,"payload":kMImuState.GetValObj()}]);
+            node.send([null,null,{"type":"imuMeasurement","name":this.deviceInfo.name,"payload":kMImuState.GetValObj()}]);
         };
 
 
@@ -90,6 +90,58 @@ module.exports = function(RED) {
             node._disconnectLis(targetMotor.deviceInfo);
             targetMotor=null;
         };
+
+        /**
+         * モーターの接続
+         * @param names
+         * @returns {*}
+         * @private
+         */
+        node._motorConnect=function(names=Array){
+            let name;
+            //
+            // ○接続モータの選別
+            // 許可リスト設定時:与えられたモーター名のリスト内に許可されたモーターがあれば接続する
+            // 許可リスト未設定:リストの最初のモーターに接続する
+            //
+            for(let i=0;i<names.length;i++){
+                if(allowConnectMotor){
+                    if(allowConnectMotor===names[i]){
+                        name=names[i];
+                        break;
+                    }
+                }else{
+                    if(names[i]){
+                        name=names[i];
+                    }
+                    break;
+                }
+            }
+            if(!name){
+                return msg;
+            }
+
+            node._motorEveInit(targetMotor);
+            if(targetMotor&&targetMotor.deviceInfo.isConnect){
+                //古いモーターが接続中なら処理しない
+                node.error("There are already connected motor. \""+targetMotor.deviceInfo.name+"\"");
+                return msg;
+            }
+
+            let newmt=getMotor(name);
+            if(!newmt){
+                node.error("Motor not found. \""+name+"\"");
+                return msg;
+            }
+            //モーターを入れかえての接続
+            if(targetMotor!==newmt){
+                node._motorSwap(newmt);
+            }
+
+            if(!targetMotor.deviceInfo.isConnect){
+                targetMotor.connect();
+            }
+        };
         /**
          * モーターの入れ替え
          * @param kMMotorOneBLE
@@ -102,10 +154,10 @@ module.exports = function(RED) {
 
             //入れ替えたtargetMotorの状態表示更新
             if(kMMotorOneBLE&&kMMotorOneBLE.deviceInfo.isConnect){
-                node.send({"topic":"status","payload":"connect",name:kMMotorOneBLE.deviceInfo.name});
+                node.send({"type":"status","payload":"connect",name:kMMotorOneBLE.deviceInfo.name});
                 node.status({fill:"green",shape:"dot",text:"connect:"+kMMotorOneBLE.deviceInfo.name});
             }else{
-                node.send({"topic":"status","payload":"disconnect",name:kMMotorOneBLE.deviceInfo.name});
+                node.send({"type":"status","payload":"disconnect",name:kMMotorOneBLE.deviceInfo.name});
                 node.status({fill:"gray",shape:"ring",text:"disconnect:"+kMMotorOneBLE.deviceInfo.name});
             }
         };
@@ -115,83 +167,54 @@ module.exports = function(RED) {
         --------------------------*/
         node.on('input', function(msg) {
             if(typeof msg !=="object"){return msg;}
-            switch(msg.topic){
+            switch(msg.type){
                 case "scanTimeout":
                 case "discoverMotor":
-                case "connect":
-                    let name;
                     let names=msg.payload instanceof Array?msg.payload:[msg.payload];
-                    //
-                    // ○接続モータの選別
-                    // 許可リスト設定時:与えられたモーター名のリスト内に許可されたモーターがあれば接続する
-                    // 許可リスト未設定:リストの最初のモーターに接続する
-                    //
-                    for(let i=0;i<names.length;i++){
-                        if(allowConnectMotor){
-                            if(allowConnectMotor===names[i]){
-                                name=names[i];
-                                break;
-                            }
-                        }else{
-                            if(names[i]){
-                                name=names[i];
-                            }
-                            break;
-                        }
-                    }
-                    if(!name){
-                        return msg;
-                    }
-
-                    node._motorEveInit(targetMotor);
-                    if(targetMotor&&targetMotor.deviceInfo.isConnect){
-                        //古いモーターが接続中なら処理しない
-                        node.error("There are already connected motor. \""+targetMotor.deviceInfo.name+"\"");
-                        return msg;
-                    }
-
-                    let newmt=getMotor(name);
-                    if(!newmt){
-                        node.error("Motor not found. \""+name+"\"");
-                        return msg;
-                    }
-                    //モーターを入れかえての接続
-                    if(targetMotor!==newmt){
-                        node._motorSwap(newmt);
-                    }
-
-                    if(!targetMotor.deviceInfo.isConnect){
-                        targetMotor.connect();
-                    }
-
-                    break;
-                case "disConnect":
-                    node._motorDisConnect();
+                    node._motorConnect(names);
                     break;
                 default:
-                    if(!targetMotor||!msg.topic){return;}
-                    //コマンドの実行　todo::全ての関数が実行出来る為、cmdのみに制限を加える
-                    if((typeof targetMotor[msg.topic])==='function'){
-                        if(msg.topic.indexOf("cmd")!==0){return;}
-                        let arg;
-                        switch (msg.topic){
-                            case "cmdReadRegister":
-                            case "cmdReadAllRegister":
-                                //出力4 モーターレジスター値取得
-                                arg=msg.payload instanceof Array?msg.payload:typeof msg.payload === "string"?msg.payload.split(','):[msg.payload];
-                                targetMotor[msg.topic](arg).then((val)=>{
-                                    node.send([null,null,null,{"topic":"setting","name":targetMotor.deviceInfo.name,"payload":val}]);
-                                }).catch((msg)=>{
-                                    node.error(msg);
-                                });
+                    if(!msg.payload){return msg;}
+                    let data=msg.payload instanceof Array?msg.payload:[msg.payload];
+                    for(let i=0;i<data.length;i++){
+                        let pd=data[i];
+                        switch(pd.cmd){
+                            case "connect":
+                                node._motorConnect(pd.arg instanceof Array?pd.arg:[pd.arg]);
+                                break;
+                            case "disConnect":
+                                node._motorDisConnect();
                                 break;
                             default:
-                                arg=msg.payload instanceof Array?msg.payload:typeof msg.payload === "string"?msg.payload.split(','):[msg.payload];
-                                let res= targetMotor[msg.topic](...arg);
+                                //コマンドの実行　todo::全ての関数が実行出来る為、cmdのみに制限を加える
+                                if(!targetMotor||(typeof targetMotor[pd.cmd])!=='function'){
+                                    continue;
+                                }
+                                if(pd.cmd.indexOf("cmd")!==0){
+                                    continue;
+                                }
+
+                                let arg;
+                                switch (pd.cmd){
+                                    case "cmdReadRegister":
+                                    case "cmdReadAllRegister":
+                                        //出力4 モーターレジスター値取得
+                                        arg=pd.arg instanceof Array?pd.arg:typeof pd.arg === "string"?pd.arg.split(','):[pd.arg];
+                                        targetMotor[pd.cmd](arg).then((val)=>{
+                                            node.send([null,null,null,{"type":"setting","name":targetMotor.deviceInfo.name,"payload":val}]);
+                                        }).catch((msg)=>{
+                                            node.error(msg);
+                                        });
+                                        break;
+                                    default:
+                                        arg=pd.arg instanceof Array?pd.arg:typeof pd.arg === "string"?pd.arg.split(','):[pd.arg];
+                                        let res= targetMotor[pd.cmd](...arg);
+                                        break;
+                                }
                                 break;
                         }
                     }
-
+                    break;
             }
             return msg;
         });

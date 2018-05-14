@@ -39,16 +39,22 @@
 <h3>入力</h3>
     <p>モーターに接続・操作する為のコマンド・引数</p>
     <dl class="message-properties">
-    <dt>topic<span class="property-type">string</span></dt>
-    <dd>モーターコマンド名 ex) cmdLed</dd>
-    <dt>payload<span class="property-type">number or array[number,,]</span></dt>
-    <dd>モーターコマンドの引数　引数が複数の場合はカンマ区切りの文字列として指定も出来ます<br/>ex) "10,20,30" </dd>
+    <dt>payload.cmd<span class="property-type">string</span></dt>
+    <dd>モーターコマンド名<br/>ex)　"cmdLed"</dd>
+    <dt>payload.arg<span class="property-type">number or array[number,,]</span></dt>
+    <dd>モーターコマンドの引数　引数が複数の場合は配列又はカンマ区切りの文字列として指定も出来ます。<br/>ex)　[10,20,30]　"10,20,30" </dd>
     </dl>
+    <p>
+    <h4>ex) LED色を変更</h4>
+    <code>{"cmd":"cmdLed","arg":[1,200,0,0]}</code>
+    <h4>ex) LED色を変更して回転(複数コマンド)</h4>
+    <code>[{"cmd":"cmdLed","arg":[1,200,0,0]},{"cmd":"cmdRunForward"}]</code>
+    </p>
      <p>コマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</p>
 <h3>出力1</h3>
     <p>モーターの各種ステータス</p>
     <dl class="message-properties">
-    <dt>topic:"status"<span class="property-type">string</span></dt>
+    <dt>type:"status"<span class="property-type">string</span></dt>
     <dd>このデータの種類 "status"</dd>
     <dt>payload<span class="property-type">string</span></dt>
     <dd>状態メッセージ 接続 "connect" 切断された "disconnect" 接続に失敗 "connectFailure"</dd>
@@ -56,7 +62,7 @@
 <h3>出力2</h3>
     <p>モーターの回転情報</p>
     <dl class="message-properties">
-    <dt>topic:"motorMeasurement"<span class="property-type">string</span></dt>
+    <dt>type:"motorMeasurement"<span class="property-type">string</span></dt>
     <dd>このデータの種類 "motorMeasurement"</dd>
     <dt>name<span class="property-type">string</span></dt>
     <dd>モーター名 ex) KM-1 XXXX</dd>
@@ -64,9 +70,9 @@
     <dd><a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMRotState.html" target="_blank">モーターの回転情報</a></dd>
     </dl>
 <h3>出力3</h3>
-    <p>モータージャイロ情報<br/>コマンドにてジャイロ有効化 "cmdEnableIMU()" 時のみ出力されます。</p>
+    <p>モータージャイロ情報<br/>コマンドにてジャイロ有効化 "cmdEnableIMU" 時のみ出力されます。</p>
     <dl class="message-properties">
-    <dt>topic:"imuMeasurement"<span class="property-type">string</span></dt>
+    <dt>type:"imuMeasurement"<span class="property-type">string</span></dt>
     <dd>このデータの種類 "imuMeasurement"</dd>
     <dt>name<span class="property-type">string</span></dt>
     <dd>モーター名 ex) KM-1 XXXX</dd>
@@ -76,7 +82,7 @@
 <h3>出力4</h3>
  <p>モーター設定値情報<br/>"cmdReadRegister"や"cmdReadAllRegister"で取得した値が出力されます。</p>
  <dl class="message-properties">
-    <dt>topic:"setting"<span class="property-type">string</span></dt>
+    <dt>type:"setting"<span class="property-type">string</span></dt>
     <dd>このデータの種類 "setting"</dd>
     <dt>name<span class="property-type">string</span></dt>
     <dd>モーター名 ex) KM-1 XXXX</dd>
@@ -87,18 +93,15 @@
 <h4>主なモーターコマンド</h4>
 <p><b>全てのコマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</b></p>
 <ul>
-<li><code>connect:"モーター名"</code> - 指定したモーターに接続する。</li>
-<li><code>disConnect:""</code> - モーターを切断する。<br/>注:同じモーターに接続しているモーターノードが複数ある場合は、全て切断されます。</li>
-<li><code>cmdReadAllRegister:""</code> - モーターの設定情報を取得する</li>
-<li><code>cmdEnable:""</code> - モーター動作を許可する。<br/>モーター起動時は disable 状態のため、本コマンドで動作を許可する必要があります。</li>
-<li><code>cmdDisable:""</code> - モーター動作を停止する。</li>
-
-<li><code>cmdSpeed_rpm:速度number</code> - 速度の大きさをセットする。（単位：RPM）</li>
-
-<li><code>cmdRunForward:""</code> - 正回転する（反時計回り）</li>
-<li><code>cmdRunReverse:""</code> - 逆回転する（時計回り）</li>
-<li><code>cmdFree:""</code> - モーターの励磁を停止する（感触は残ります）<br/>
-完全な空転状態を再現する場合は、<code>cmdFree:""</code><code>cmdDisable:""</code>と実行して下さい。</li>
-<li><code>cmdStop:""</code> - モーターを速度ゼロまで減速し停止する。<br/>rpm = 0 となる。</li>
+<li><p><code>{"cmd":"connect",arg:"モーター名"}</code> - 指定したモーターに接続する。</p></li>
+<li><p><code>{"cmd":"disConnect"}</code> - モーターを切断する。<br/>注:同じモーターに接続しているモーターノードが複数ある場合は、全て切断されます。</p></li>
+<li><p><code>{"cmd":"cmdReadAllRegister"}</code> - モーターの設定情報を取得する</p></li>
+<li><p><code>{"cmd":"cmdEnable"}</code> - モーター動作を許可する。<br/>モーター起動時は disable 状態のため、本コマンドで動作を許可する必要があります。</p></li>
+<li><p><code>{"cmd":"cmdDisable"}</code> - モーター動作を停止する。</p></li>
+<li><p><code>{"cmd":"cmdSpeed_rpm",arg:速度number}</code> - 速度の大きさをセットする。（単位：RPM）</p></li>
+<li><p><code>{"cmd":"cmdRunForward"}</code> - 正回転する（反時計回り）</p></li>
+<li><p><code>{"cmd":"cmdRunReverse"}</code> - 逆回転する（時計回り）</p></li>
+<li><p><code>{"cmd":"cmdFree"}</code> - モーターの励磁を停止する（感触は残ります）<br/>完全な空転状態を再現する場合は、<code>{"cmd":"cmdFree"}</code><code>{"cmd":"cmdDisable"}</code>と実行して下さい。</p></li>
+<li><p><code>{"cmd":"cmdStop"}</code> - モーターを速度ゼロまで減速し停止する。<br/>rpm = 0 となる。</p></li>
 </ul>
 </script>

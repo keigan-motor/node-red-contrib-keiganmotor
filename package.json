@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-keiganmotor",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Keigan Motor node-red node.",
   "main": "km-BLEscanner.js",
   "repository": {
@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "kmconnector": "^0.1.11"
+    "kmconnector": "^0.1.12"
   },
   "keywords": [
     "node-red","motor","keigan"
