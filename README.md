@@ -2,6 +2,10 @@
 
 KeiganMotorをNode-REDから操作するノード  
 
+![sc_1](/sc_1.png)
+
+![sc_2](/sc_2.png)
+
 ##概要
 <p>KeiganMotorにはBLEで接続する為、BLEアダプタを搭載したデバイス上のNode-REDで動作します。  
 以下のデバイスで動作検証してます。
