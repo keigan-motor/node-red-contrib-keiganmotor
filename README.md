@@ -17,7 +17,7 @@ KeiganMotorをNode-REDから操作するノード
 
 
 ##インストール
-<p>Node-REDのROOT(.node-red)ディレクトリで以下を実行</p>
+<p>Node-REDのルートディレクトリで以下を実行</p>
 
 ```
  $npm install node-red-contrib-keiganmotor
