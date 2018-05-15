@@ -17,8 +17,8 @@ KeiganMotorをNode-REDから操作するノード
 ## インストールA (Node-RED Libraryからインストール)
 <p>Node-REDのフローエディタから追加する事も可能です</p>
 <p>パレットの管理>ノードを追加>ノードを検索>"keiganmotor"</p>
-![sc_3](/sc_3.png)
 
+![sc_3](/sc_3.png)
 
 ## インストールB (npmからインストール)
 <p>Node-REDのROOT(.node-red)ディレクトリで以下を実行</p>
