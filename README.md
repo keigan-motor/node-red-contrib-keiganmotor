@@ -23,7 +23,8 @@ KeiganMotorをNode-REDから操作するノード
  $npm install node-red-contrib-keiganmotor
  ```
  ## 実行権限の付与 (Raspberry Pi 3)
-<p>raspberry piでBLEを実行する場合、スーパーユーザー権限が必要です。  
+<p>raspberry piでBLEを実行する場合、スーパーユーザー権限が必要です。 
+ 
 通常のユーザーとしてNode-Redを実行している場合、BLEを実行するためのアクセス許可を与える必要があります。</p>
 
 ```
@@ -31,7 +32,6 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
  ```
  
 ## 依存関係
-- npm >=6.0.0
 - noble 1.8+
 - [kmconnector](https://github.com/keigan-motor/kmconnector-js)
 
