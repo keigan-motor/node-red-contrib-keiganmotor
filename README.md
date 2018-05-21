@@ -12,15 +12,10 @@ KeiganMotorをNode-REDから操作するノード
 
 + Raspberry Pi 3 Model B
 + MacBook
+**Raspberry Zero Wは動作しません**
 </p>
 
-## インストールA (Node-RED Libraryからインストール)
-<p>Node-REDのフローエディタから追加する事も可能です</p>
-<p>パレットの管理>ノードを追加>ノードを検索>"keiganmotor"</p>
-
-![sc_3](/sc_3.png)
-
-## インストールB (npmからインストール)
+## インストール (npmからインストール)
 <p>Node-REDのROOT(.node-red)ディレクトリで以下を実行</p>
 
 ```
@@ -28,7 +23,7 @@ KeiganMotorをNode-REDから操作するノード
  ```
  
 ## 依存関係
-
+- npm >=6.0.0
 - noble 1.8+
 - [kmconnector](https://github.com/keigan-motor/kmconnector-js)
 
