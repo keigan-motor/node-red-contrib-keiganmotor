@@ -11,9 +11,10 @@ KeiganMotorをNode-REDから操作するノード
 以下のデバイスで動作検証してます。
 
 + Raspberry Pi 3 Model B
-+ MacBook
-**Raspberry Zero Wは動作しません**
++ MacBook 
 </p>
+
+**※Raspberry Zero W では動作しません**
 
 ## インストール (npmからインストール)
 <p>Node-REDのROOT(.node-red)ディレクトリで以下を実行</p>
