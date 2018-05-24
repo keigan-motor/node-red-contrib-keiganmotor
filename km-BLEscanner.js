@@ -9,16 +9,18 @@ module.exports = function(RED) {
     //スキャンの開始
     function startScan(time,countCB=function(){}){
         let tm=parseInt(time,10);
-        tm=isNaN(tm)?2000:tm;
+        tm=isNaN(tm)?20:tm;
         clearInterval(nowScaningCounterInterval);
-        nowScaningRemainingTime=Math.floor(tm/1000);
+        nowScaningRemainingTime=tm;
         nowScaningCounterInterval=setInterval(function(){
             --nowScaningRemainingTime;
             countCB(nowScaningRemainingTime);
             if(nowScaningRemainingTime<=0){clearInterval(nowScaningCounterInterval);}
         },1000);
-        KMConnector.KMMotorOneBLE.startScanToCreateInstance(tm,false);
+        KMConnector.KMMotorOneBLE.startScanToCreateInstance(tm*1000,false);
     }
+
+
     /*-------------------------------
         node red node constructor
     -------------------------------*/
@@ -26,10 +28,11 @@ module.exports = function(RED) {
     function kmBLEscanner(config) {
         RED.nodes.createNode(this,config);//instance init
         let node = this;
-        let discoverName=[];
+        node.discoverName=[];
+        node.search_cnt=0;//n個発見でスキャン停止 0は無制限
 
         this._statusUpdateDuringScanning=function(time){
-            node.status({fill:"blue",shape:"dot",text:"["+time+"] Scanning > "+discoverName.join(":")});
+            node.status({fill:"blue",shape:"dot",text:"["+time+"] Scanning > ["+node.discoverName.join("] [")+"]"});
         };
         this._discoverMotorLis=function(kMMotorOneBLE){
             if(nowScaningNodeId!==node.id){
@@ -39,11 +42,16 @@ module.exports = function(RED) {
             let name=  fullname&&typeof fullname ==="string"? fullname.split('#')[0]:null;
             let ledColor=  fullname&&typeof fullname ==="string"? fullname.split('#')[1]:null;
             //console.log("MotorName: "+name);
-            discoverName.push(name);
+            node.discoverName.push(name);
             node._statusUpdateDuringScanning(nowScaningRemainingTime);
-            //node.status({fill:"blue",shape:"dot",text:"During scanning..Discover:"+discoverName.join(":")});
             node.send([{type:"discoverMotor",payload:name,motorFullname:fullname,motorLedColor: ledColor,isConnect:kMMotorOneBLE.deviceInfo.isConnect}]);
+            //n個発見で停止
+            if(node.search_cnt&&node.search_cnt>=node.discoverName.length){
+                KMConnector.KMMotorOneBLE.stopScan();//info::stopScan停止時はKMMotorOneBLE.EVENT_TYPE.scanTimeout (_scanTimeoutLis)は発火しない
+                node._scanTimeoutLis();
+            }
         };
+
         this._scanTimeoutLis=function(){
             if(nowScaningNodeId!==node.id){
                 return;
@@ -57,8 +65,8 @@ module.exports = function(RED) {
             Object.keys(motors).forEach(function(k){
                 deviceInfos[k]=motors[k].deviceInfo;
             });
-            node.status({fill:"green",shape:"ring",text:"Discover:"+motorNemes.join(":")});
-            node.send([null,{type:"scanTimeout", payload: motorNemes,deviceInfos:deviceInfos}]);
+            node.status({fill:"green",shape:"ring",text:"Discover:["+motorNemes.join("] [")+"]"});
+            node.send([{type:"scanTimeout", payload: motorNemes,deviceInfos:deviceInfos}]);
         };
 
         //
@@ -72,20 +80,47 @@ module.exports = function(RED) {
             }
         });
 
+        /**
+         * 引数 msg.payload
+         * ○通常スキャン(既存)  int:スキャン時間ms　
+         * ○スキャン停止 int:0 又は""
+         * ○n個発見で停止 string:スキャン時間ms,発見する個数
+         */
         this.on('input', function(msg){
             if(KMConnector.KMMotorOneBLE.bleState!=="poweredOn"){
                 node.error("BLE adapter is disable");
                 return;
             }
+            //他のスキャンノードで使用中は動作しない
             if(nowScaningNodeId&&nowScaningNodeId!==node.id){
                 node.error("The scanner is in use on another node \""+nowScaningNodeId+"\"");
                 node.status({fill:"red",shape:"dot",text:"The scanner is in use on another node"});
                 return;
             }
-            nowScaningNodeId=node.id;
-            discoverName.splice(0, discoverName.length);
-            startScan(msg.payload,node._statusUpdateDuringScanning.bind(this));
-            node.status({fill:"blue",shape:"dot",text:"During scanning.."});
+            //引数取得と処置開始
+            let time=0;
+            node.search_cnt=0;
+            switch (typeof msg.payload){
+                case "number":
+                    time=msg.payload;
+                    break;
+                case "string":
+                    let args=msg.payload.split(",");
+                    time=isNaN(parseInt(args[0],10))?0:parseInt(args[0],10);
+                    node.search_cnt=isNaN(parseInt(args[1],10))?0:parseInt(args[1],10);
+                    break;
+            }
+            if(time){
+                //スキャン開始
+                nowScaningNodeId=node.id;
+                node.discoverName=[];
+                startScan(time<20?20:time,node._statusUpdateDuringScanning.bind(this));
+                node.status({fill:"blue",shape:"dot",text:"During scanning.."});
+            }else{
+                //スキャン停止コマンド
+                KMConnector.KMMotorOneBLE.stopScan();//info::stopScan停止時はKMMotorOneBLE.EVENT_TYPE.scanTimeout (_scanTimeoutLis)は発火しない
+                node._scanTimeoutLis();
+            }
         });
 
         this.on('close', function() {
@@ -96,7 +131,7 @@ module.exports = function(RED) {
         //default status
         let _mn=Object.keys(KMConnector.KMMotorOneBLE.motors);
         if(_mn.length){
-            node.status({fill:"green",shape:"ring",text:"Discover:["+_mn.join("][")+"]"});
+            node.status({fill:"green",shape:"ring",text:"Discover:["+_mn.join("] [")+"]"});
         }else {
             node.status({});
         }

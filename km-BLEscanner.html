@@ -6,9 +6,9 @@
             name: {value:""},
         },
         inputs:1,
-        outputs:2,
+        outputs:1,
         inputLabels: "Scan command input",
-        outputLabels: ["Discovered motor information output","Scan timeout output"],
+        outputLabels: ["Motor information output"],
         icon: "bridge.png",
         paletteLabel:"BLE scanner",
         label: function() {
@@ -28,36 +28,38 @@
     <p>KeiganMotorを検出するBLEscannerです。このスキャナーで検出されたモーター名をKeiganMotorノードに渡します。</p>
     <h3>入力</h3>
     <dl class="message-properties">
-    <dt>payload<span class="property-type">number</span></dt>
-    <dd>スキャンする時間(ms)</dd>
-    </dl>
-    <h3>出力1</h3>
-    <p>スキャン中に発見したモーター名を随時出力</p>
-    <dl class="message-properties">
-    <dt>type:"discoverMotor"<span class="property-type">string</span></dt>
-    <dd>このデータの種類 "discoverMotor"</dd>
-    <dt>payload<span class="property-type">string</span></dt>
-    <dd>発見したモーター名</dd>
-    <dt>motorFullname<span class="property-type">string</span></dt>
-    <dd>発見したモーター名(LEDコード含む)</dd>
-    <dt>motorLedColor<span class="property-type">string</span></dt>
-    <dd>発見したモーターのLEDカラー値(RGB 各16段階)</dd>
-    <dt>isConnect<span class="property-type">boolean</span></dt>
-    <dd>モーターの接続状態</dd>
+        <dt>payload:Number<span class="property-type">number</span></dt>
+        <dd>スキャンする時間(sec)<br/>0を指定すると、スキャンを停止します。<br/>ex)
+            <p><code>20</code> - タイムアウトは20秒でスキャン</p>
+            <p><code>0</code> - スキャン停止</p>
+        </dd>
+        <dt>payload:"スキャン時間(ms),検出モーター数"<span class="property-type">string</span></dt>
+        <dd>検出モーター数以上のモーターを検出したらスキャンを終了<br/>ex)
+            <p><code>"20,2"</code> - モータを2個以上検出したらスキャンを終了。タイムアウトは20秒</p>
+        </dd>
     </dl>
 
-     <h3>出力2</h3>
-    <p>スキャン終了時にスキャン中に発見したモーター名を一括出力</p>
-    <dl class="message-properties">
-    <dt>type:"scanTimeout"<span class="property-type">string</span></dt>
-    <dd>このデータの種類 "scanTimeout"</dd>
-
-    <dt>payload<span class="property-type">array[string,,]</span></dt>
-    <dd>発見したモーター名の配列</dd>
-
-    <dt>deviceInfos<span class="property-type">object</span></dt>
-    <dd>発見したモーターの詳細情報</dd>
-    </dl>
+     <h3>出力</h3>
+        <dl class="message-properties">
+            <dt>type:"discoverMotor"<span class="property-type">string</span></dt>
+            <dd>スキャン中に発見したモーター名</dd>
+            <dt>payload<span class="property-type">string</span></dt>
+            <dd>発見したモーター名</dd>
+            <dt>motorFullname<span class="property-type">string</span></dt>
+            <dd>発見したモーター名(LEDコード含む)</dd>
+            <dt>motorLedColor<span class="property-type">string</span></dt>
+            <dd>発見したモーターのLEDカラー値(RGB 各16段階)</dd>
+            <dt>isConnect<span class="property-type">boolean</span></dt>
+            <dd>モーターの接続状態</dd>
+        </dl>
+        <dl class="message-properties">
+            <dt>type:"scanTimeout"<span class="property-type">string</span></dt>
+            <dd>スキャン終了時</dd>
+            <dt>payload<span class="property-type">array[string,,]</span></dt>
+            <dd>スキャン中に発見したモーター名の配列</dd>
+            <dt>deviceInfos<span class="property-type">object</span></dt>
+            <dd>スキャン中に発見したモーターの詳細情報</dd>
+        </dl>
     <h3>詳細</h3>
     <ul>
         <li>スキャナーで検出されていないモーターは接続できません。</li>

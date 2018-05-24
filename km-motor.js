@@ -10,7 +10,9 @@ module.exports = function(RED) {
         ////instance///////////////////
         let node = this;
         let targetMotor;
-        let allowConnectMotor=typeof config.allowConnectMotor==="string"?config.allowConnectMotor.replace(/\*/g,''):"";
+        let allowConnectMotor=typeof config.allowConnectMotor==="string"?motorNameExcludingColor(config.allowConnectMotor.replace(/\*/g,'')):"";
+
+        node.previousMotor=null;//前回接続モーター名
         /*--------------------------
         // モーター用イベントリスナー
         --------------------------*/
@@ -18,25 +20,26 @@ module.exports = function(RED) {
         node._connectLis=function(kMDeviceInfo){
             console.log("_connectLis:"+kMDeviceInfo.name);
             if(kMDeviceInfo.isConnect){
+                node.previousMotor=motorNameExcludingColor(kMDeviceInfo.name);
                 node.send({"type":"status","payload":"connect",name:kMDeviceInfo.name});
-                node.status({fill:"green",shape:"dot",text:"connect:"+kMDeviceInfo.name});
+                node.status({fill:"green",shape:"dot",text:"connect:"+node.previousMotor});
             }
         };
         //出力1 応答が無くなった・切断された
         node._disconnectLis=function(kMDeviceInfo){
             console.log("_disconnectLis:"+kMDeviceInfo.name);
             node.send({"type":"status","payload":"disconnect",name:kMDeviceInfo.name});
-            node.status({fill:"gray",shape:"ring",text:"disconnect:"+kMDeviceInfo.name});
+            node.status({fill:"gray",shape:"ring",text:"disconnect:"+motorNameExcludingColor(kMDeviceInfo.name)});
         };
         //出力1 接続に失敗
         node._connectFailureLis=function(kMDeviceInfo,err){
             node.send({"type":"status","payload":"connectFailure",name:kMDeviceInfo.name,err:err});
-            node.status({fill:"red",shape:"ring",text:"connectFailure:"+kMDeviceInfo.name});
+            node.status({fill:"red",shape:"ring",text:"connectFailure:"+motorNameExcludingColor(kMDeviceInfo.name)});
         };
         //出力1 初期化完了して利用できるようになった
         node._initLis=function(kMDeviceInfo){
            // node.send({"type":"status","payload":"init",name:kMDeviceInfo.name});//物理デバイス毎でのイベント。使用しない
-            node.status({fill:"blue",shape:"ring",text:"init:"+kMDeviceInfo.name});
+            node.status({fill:"blue",shape:"ring",text:"init:"+motorNameExcludingColor(kMDeviceInfo.name)});
         };
 
         //出力2 モーターの回転情報
@@ -98,6 +101,10 @@ module.exports = function(RED) {
          * @private
          */
         node._motorConnect=function(names=Array){
+            //引数無し[]は既存のモーターの再接続
+            if(names.length===1&&!names[0]){
+                names[0]=node.previousMotor?node.previousMotor:null;
+            }
             let name;
             //
             // ○接続モータの選別
@@ -118,37 +125,42 @@ module.exports = function(RED) {
                 }
             }
             if(!name){
-                return msg;
+                return;
             }
 
-            node._motorEveInit(targetMotor);
+
             if(targetMotor&&targetMotor.deviceInfo.isConnect){
                 //古いモーターが接続中なら処理しない
                 node.error("There are already connected motor. \""+targetMotor.deviceInfo.name+"\"");
-                return msg;
+                return ;
             }
 
             let newmt=getMotor(name);
             if(!newmt){
                 node.error("Motor not found. \""+name+"\"");
-                return msg;
+                return ;
             }
             //モーターを入れかえての接続
             if(targetMotor!==newmt){
                 node._motorSwap(newmt);
+            }else{
+                node._motorEveInit(targetMotor);
             }
 
             if(!targetMotor.deviceInfo.isConnect){
                 targetMotor.connect();
             }
         };
+
         /**
          * モーターの入れ替え
          * @param kMMotorOneBLE
          * @private
          */
         node._motorSwap=function(kMMotorOneBLE){
+            console.log("node._motorSwap","try _motorDisConnect ");
             node._motorDisConnect();//古いモータの切断
+
             node._motorEveInit(kMMotorOneBLE);
             targetMotor=kMMotorOneBLE;
 
@@ -168,8 +180,8 @@ module.exports = function(RED) {
         node.on('input', function(msg) {
             if(typeof msg !=="object"){return msg;}
             switch(msg.type){
+                //case "discoverMotor":
                 case "scanTimeout":
-                case "discoverMotor":
                     let names=msg.payload instanceof Array?msg.payload:[msg.payload];
                     node._motorConnect(names);
                     break;
@@ -225,10 +237,13 @@ module.exports = function(RED) {
     }
 
     function getMotor(motorName){
-        let name=motorName&&typeof motorName ==="string"? motorName.split('#')[0]:null;
+        let name=motorNameExcludingColor(motorName);
        return KMConnector.KMMotorOneBLE.motors[name];
     }
 
+    function motorNameExcludingColor(motorFullName){
+        return typeof motorFullName === "string"?motorFullName.split('#')[0]:null;
+    }
     ////
     RED.nodes.registerType("km-motor",kmMotor);
 

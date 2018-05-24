@@ -42,7 +42,7 @@
     <dt>payload.cmd<span class="property-type">string</span></dt>
     <dd>モーターコマンド名<br/>ex)　"cmdLed"</dd>
     <dt>payload.arg<span class="property-type">number or array[number,,]</span></dt>
-    <dd>モーターコマンドの引数　引数が複数の場合は配列又はカンマ区切りの文字列として指定も出来ます。<br/>ex)　[10,20,30]　"10,20,30" </dd>
+    <dd>モーターコマンドの引数<br/>引数が複数の場合は配列又はカンマ区切りの文字列として指定も出来ます。<br/>ex)　[10,20,30]　"10,20,30" </dd>
     </dl>
     <p>
     <h4>ex) LED色を変更</h4>
@@ -93,7 +93,7 @@
 <h4>主なモーターコマンド</h4>
 <p><b>全てのコマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</b></p>
 <ul>
-<li><p><code>{"cmd":"connect",arg:"モーター名"}</code> - 指定したモーターに接続する。</p></li>
+<li><p><code>{"cmd":"connect",arg:"モーター名"}</code> - 指定したモーターに接続する。<br/>引数argを省略すると、前回接続したモータに接続します。</p></li>
 <li><p><code>{"cmd":"disConnect"}</code> - モーターを切断する。<br/>注:同じモーターに接続しているモーターノードが複数ある場合は、全て切断されます。</p></li>
 <li><p><code>{"cmd":"cmdReadAllRegister"}</code> - モーターの設定情報を取得する</p></li>
 <li><p><code>{"cmd":"cmdEnable"}</code> - モーター動作を許可する。<br/>モーター起動時は disable 状態のため、本コマンドで動作を許可する必要があります。</p></li>
