@@ -1,4 +1,4 @@
-let KMConnector=require('kmconnector');
+let KMConnector=require('kmconnector/KMConnectorBLE');
 
 /////
 module.exports = function(RED) {

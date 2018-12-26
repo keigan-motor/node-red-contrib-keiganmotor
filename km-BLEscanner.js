@@ -1,5 +1,4 @@
-let KMConnector=require('kmconnector');
-
+let KMConnector=require('kmconnector/KMConnectorBLE');
 ////////
 module.exports = function(RED) {
     let nowScaningNodeId=null;//スキャナーNodeが複数ある場合、他のスキャナーNodeをトリガーしない為のフラグ
