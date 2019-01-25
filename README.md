@@ -4,6 +4,7 @@ KeiganMotorをNode-REDから操作するノード
 
 ![sc_1](/sc_1.png)
 
+![sc_2](/sc_2.png)
 
 ## 概要
 <p>KeiganMotorにはBLEで接続する為、BLEアダプタを搭載したデバイス上のNode-REDで動作します。  
@@ -13,19 +14,12 @@ KeiganMotorをNode-REDから操作するノード
 + MacBook 
 </p>
 
-## インストールA (npmからインストール)
+## インストール (npmからインストール)
 <p>Node-REDのROOT(.node-red)ディレクトリで以下を実行</p>
 
 ```
  $npm install node-red-contrib-keiganmotor
  ```
- 
- ## インストールB (フローエディタからインストール)
-<p>Node-REDのフローエディタから追加する事ができます。  
-<code>パレットの管理 > ノードを追加 > ノードを検索 > "keiganmotor"</code>
-</p>
-
-
  ## 実行権限の付与 (Raspberry Pi 3)
 <p>raspberry piでBLEを実行する場合、スーパーユーザー権限が必要です。 
  

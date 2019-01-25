@@ -175,24 +175,26 @@ module.exports = function(RED) {
         };
 
         /*--------------------------
-        // 初期化
+        // 初期化 Array.isArray(pd.arg)
         --------------------------*/
         node.on('input', function(msg) {
             if(typeof msg !=="object"){return msg;}
             switch(msg.type){
                 //case "discoverMotor":
                 case "scanTimeout":
-                    let names=msg.payload instanceof Array?msg.payload:[msg.payload];
+                    let names=Array.isArray(msg.payload)?msg.payload:[msg.payload];
                     node._motorConnect(names);
                     break;
                 default:
+                    //console.log(targetMotor?targetMotor.deviceInfo.name:"null",msg.payload);//todo::debug
+
                     if(!msg.payload){return msg;}
-                    let data=msg.payload instanceof Array?msg.payload:[msg.payload];
+                    let data=Array.isArray(msg.payload)?msg.payload:[msg.payload];
                     for(let i=0;i<data.length;i++){
                         let pd=data[i];
                         switch(pd.cmd){
                             case "connect":
-                                node._motorConnect(pd.arg instanceof Array?pd.arg:[pd.arg]);
+                                node._motorConnect(Array.isArray(pd.arg)?pd.arg:[pd.arg]);
                                 break;
                             case "disConnect":
                                 node._motorDisConnect();
@@ -211,7 +213,7 @@ module.exports = function(RED) {
                                     case "cmdReadRegister":
                                     case "cmdReadAllRegister":
                                         //出力4 モーターレジスター値取得
-                                        arg=pd.arg instanceof Array?pd.arg:typeof pd.arg === "string"?pd.arg.split(','):[pd.arg];
+                                        arg=Array.isArray(pd.arg)?pd.arg:typeof(pd.arg) === "string"?pd.arg.split(','):[pd.arg];
                                         targetMotor[pd.cmd](arg).then((val)=>{
                                             node.send([null,null,null,{"type":"setting","name":targetMotor.deviceInfo.name,"payload":val}]);
                                         }).catch((msg)=>{
@@ -219,7 +221,7 @@ module.exports = function(RED) {
                                         });
                                         break;
                                     default:
-                                        arg=pd.arg instanceof Array?pd.arg:typeof pd.arg === "string"?pd.arg.split(','):[pd.arg];
+                                        arg=Array.isArray(pd.arg)?pd.arg:(typeof pd.arg === "string"?pd.arg.split(','):[pd.arg]);
                                         let res= targetMotor[pd.cmd](...arg);
                                         break;
                                 }

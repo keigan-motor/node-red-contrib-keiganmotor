@@ -45,7 +45,7 @@ module.exports = function(RED) {
             node._statusUpdateDuringScanning(nowScaningRemainingTime);
             node.send([{type:"discoverMotor",payload:name,motorFullname:fullname,motorLedColor: ledColor,isConnect:kMMotorOneBLE.deviceInfo.isConnect}]);
             //n個発見で停止
-            if(node.search_cnt&&node.search_cnt>=node.discoverName.length){
+            if(node.search_cnt&&node.search_cnt<=node.discoverName.length){
                 KMConnector.KMMotorOneBLE.stopScan();//info::stopScan停止時はKMMotorOneBLE.EVENT_TYPE.scanTimeout (_scanTimeoutLis)は発火しない
                 node._scanTimeoutLis();
             }
