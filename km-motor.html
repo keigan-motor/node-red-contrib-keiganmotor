@@ -50,7 +50,7 @@
     <h4>ex) LED色を変更して回転(複数コマンド)</h4>
     <code>[{"cmd":"cmdLed","arg":[1,200,0,0]},{"cmd":"cmdRunForward"}]</code>
     </p>
-     <p>コマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</p>
+     <p>コマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#cmdAcc" target="_blank">APIドキュメント</a>を参照下さい。</p>
 <h3>出力1</h3>
     <p>モーターの各種ステータス</p>
     <dl class="message-properties">
@@ -87,11 +87,11 @@
     <dt>name<span class="property-type">string</span></dt>
     <dd>モーター名 ex) KM-1 XXXX</dd>
     <dt>payload<span class="property-type">object</span></dt>
-    <dd><a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorCommandKMOne.html#.cmdReadRegister_COMMAND__anchor" target="_blank">取得した設定</a></dd>
+    <dd><a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#cmdReadRegister" target="_blank">取得した設定</a></dd>
     </dl>
 <h3>詳細</h3>
 <h4>主なモーターコマンド</h4>
-<p><b>全てのコマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#connect__anchor" target="_blank">APIドキュメント</a>を参照下さい。</b></p>
+<p><b>全てのコマンド及び引数は<a href="https://document.keigan-motor.com/apiDocument/kmconnector-js/KMMotorOneBLE.html#cmdAcc" target="_blank">APIドキュメント</a>を参照下さい。</b></p>
 <ul>
 <li><p><code>{"cmd":"connect",arg:"モーター名"}</code> - 指定したモーターに接続する。<br/>引数argを省略すると、前回接続したモータに接続します。</p></li>
 <li><p><code>{"cmd":"disConnect"}</code> - モーターを切断する。<br/>注:同じモーターに接続しているモーターノードが複数ある場合は、全て切断されます。</p></li>
