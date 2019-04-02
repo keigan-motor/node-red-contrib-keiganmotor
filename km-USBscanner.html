@@ -1,0 +1,61 @@
+<script type="text/javascript">
+    RED.nodes.registerType('km-USBscan',{
+        category: 'Keigan Motor',
+        color: '#caceff',
+        defaults: {
+            name: {value:""},
+        },
+        inputs:1,
+        outputs:1,
+        inputLabels: "Scan command input",
+        outputLabels: ["Motor information output"],
+        icon: "bridge.png",
+        paletteLabel:"USB scanner",
+        label: function() {
+            return this.name||"Keigan USB scanner";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="km-USBscan">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="km-USBscan">
+    <p>KeiganMotorを検出するUSBscannerです。このスキャナーで検出されたモーター名をKeiganMotorノードに渡します。</p>
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt>payload:Number<span class="property-type">number</span></dt>
+        <dd>スキャンを開始します。</dd>
+    </dl>
+
+     <h3>出力</h3>
+        <dl class="message-properties">
+            <dt>type:"discoverMotor"<span class="property-type">string</span></dt>
+            <dd>スキャン中に発見したモーター名</dd>
+            <dt>payload<span class="property-type">string</span></dt>
+            <dd>発見したモーター名</dd>
+            <dt>motorFullname<span class="property-type">string</span></dt>
+            <dd>発見したモーター名(LEDコード含む)</dd>
+            <dt>motorLedColor<span class="property-type">string</span></dt>
+            <dd>発見したモーターのLEDカラー値(RGB 各16段階)</dd>
+            <dt>isConnect<span class="property-type">boolean</span></dt>
+            <dd>モーターの接続状態</dd>
+        </dl>
+        <dl class="message-properties">
+            <dt>type:"scanTimeout"<span class="property-type">string</span></dt>
+            <dd>スキャン終了時</dd>
+            <dt>payload<span class="property-type">array[string,,]</span></dt>
+            <dd>スキャン中に発見したモーター名の配列</dd>
+            <dt>deviceInfos<span class="property-type">object</span></dt>
+            <dd>スキャン中に発見したモーターの詳細情報</dd>
+        </dl>
+    <h3>詳細</h3>
+    <ul>
+        <li>スキャナーで検出されていないモーターは接続できません。</li>
+        <li>スキャナーが複数ある場合や別のフローに設置したスキャナーでモーターを検出している場合、検出したモーターは全てのスキャナーで共有されます。</li>
+    </ul>
+</script>

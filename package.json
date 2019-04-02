@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-keiganmotor",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Keigan Motor node-red node.",
   "main": "none",
   "repository": {
@@ -22,8 +22,10 @@
   "node-red": {
     "version": ">=0.14.0",
     "nodes": {
-      "km-motor": "km-motor.js",
-      "km-BLEscan": "km-BLEscanner.js"
+      "km-BLEscan": "km-BLEscanner.js",
+      "km-USBscan": "km-USBscanner.js",
+      "km-motor": "km-motor-ble.js",
+      "km-motor-usb": "km-motor-usb.js"
     }
   },
   "author": "Keigan Inc.",
