@@ -11,10 +11,10 @@
         inputLabels: "Motor command input",
         outputLabels: ["Status output","Motor measurement output","Imu measurement output","Motor setting output"],
         icon: "kmmt.png",
-        paletteLabel:"BLE Motor",
-        label: function() {
-            return (this.name||"BLE Motor")+" /"+(this.allowConnectMotor||"*");
-        }
+        paletteLabel: "BLE Motor",
+        label: function () {
+            return this.name || this._("km-motor.km-motor") + " /" + (this.allowConnectMotor||"*");
+        },
     });
 </script>
 
@@ -24,12 +24,10 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
      <div class="form-row">
-      <label for="node-input-allowConnectMotor"><i class="icon-tag"></i>Allow Connect Motor</label>
+      <label for="node-input-allowConnectMotor"><i class="icon-tag"></i> <span data-i18n="km-motor.label.allow_connect_motor"></span></label>
       <input type="text" id="node-input-allowConnectMotor" size="12" placeholder="KM-1U xxxx">
     </div>
     <div class="form-tips"><b>Allow Connect Motor:</b>
-    <p>ここに記述のあるモーター名のモーターのみ接続を許可します。<br/>
-    スキャナーの出力に複数のモータノードを接続した場合に、スキャナーで検出した複数のモーターを任意のモーターノードに割り当てる場合に使用します。<br/>
-    接続を制限しない場合はヌル""を指定します。</p>
+        <span data-i18n="km-motor.tips"></span>
     </div>
 </script>
