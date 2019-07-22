@@ -2,8 +2,11 @@
     "km-motor":{
         "km-motor": "BLE Motor",
         "label":{
-            "allow_connect_motor": "Allow Connect Motor"
+            "allowConnectMotor": "Allow Connect Motor"
         },
-        "tips": "ここに記述のあるモーター名のモーターのみ接続を許可します。スキャナーの出力に複数のモータノードを接続した場合に、スキャナーで検出した複数のモーターを任意のモーターノードに割り当てる場合に使用します。接続を制限しない場合はヌルを指定します。"
+        "placeholder":{
+            "allowConnctMotor": "KM-1U xxxx"
+        },
+        "tips": "When multiple motors are connected to the output of the scanner, it is used when multiple motors detected by the scanner are assigned to any motor. Specify null if you do not want to limit the connection."
     }
 }
