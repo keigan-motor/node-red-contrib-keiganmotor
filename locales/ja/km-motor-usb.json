@@ -1,0 +1,12 @@
+{
+    "km-motor-usb":{
+        "km-motor-usb": "USB Motor",
+        "label":{
+            "allowConnctMotor" : "Allow Connect Motor"
+        },
+        "placeholder":{
+            "allowConnctMotor": "KM-1U xxxx"
+        },
+        "tips": "ここに記述のあるモーター名のモーターのみ接続を許可します。スキャナーの出力に複数のモータノードを接続した場合に、スキャナーで検出した複数のモーターを任意のモーターノードに割り当てる場合に使用します。接続を制限しない場合はヌルを指定します。"
+    }
+}
